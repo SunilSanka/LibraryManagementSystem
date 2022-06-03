@@ -1,18 +1,16 @@
 package com.in28min.librarymanagement.jpa.controller;
 
 import java.net.URI;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -26,10 +24,7 @@ import com.in28min.librarymanagement.jpa.repository.BookRepository;
 import com.in28min.librarymanagement.jpa.repository.ReservationRepo;
 import com.in28min.librarymanagement.jpa.repository.UserRepository;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 
 @RestController
@@ -44,45 +39,14 @@ public class ReservationController {
 	@Autowired
 	private BookRepository bookRepo;
 	
-	@GetMapping("/lb/reservations")
-	public List<Reservation> retrieveAllReservations(){
+	@GetMapping("/lb/reservation")
+	public List<Reservation>  getAllReservation() {
 		return resvRepo.findAll();
 	}
 	
-	@GetMapping("/lb/user/{id}/reservation")
-	public EntityModel<List<Reservation>> retrieveUserReservation(@PathVariable int userid) {
-		Optional<User> userOptional = userRepo.findById(userid);
-		if(!userOptional.isPresent()) {
-			throw new UserNotFoundException("userid - :"+userid);
-		}
-		User user = userOptional.get();
-		List<Reservation> userReservations = user.getReservations();
-		EntityModel<List<Reservation>> model = EntityModel.of(userReservations);
-		WebMvcLinkBuilder linkToReservations = 
-				linkTo(methodOn(this.getClass()).retrieveAllReservations());
-		
-		model.add(linkToReservations.withRel("all-reservations"));
-		return model;
-	}
+	private final int FINE_AMOUNT = 500;
 	
-	@GetMapping("/lb/book/{id}/reservation")
-	public EntityModel<List<Reservation>> retrieveBookReservation(@PathVariable int bookid) {
-		Optional<Book> bookOptional = bookRepo.findById(bookid);
-		if(!bookOptional.isPresent()) {
-			throw new UserNotFoundException("book id - :"+bookid);
-		}
-		Book book = bookOptional.get();
-		List<Reservation> bookReservations = book.getReservation();
-		EntityModel<List<Reservation>> model = EntityModel.of(bookReservations);
-		WebMvcLinkBuilder linkToReservations = 
-				linkTo(methodOn(this.getClass()).retrieveAllReservations());
-		
-		model.add(linkToReservations.withRel("all-reservations"));
-		return model;
-	}
-	
-	
-	@PostMapping("/lb/uses/{userid}/book/{bookid}/reservation")
+	@PostMapping("/lb/reservation/user/{userid}/book/{bookid}")
 	public ResponseEntity<Reservation> createReservation(@PathVariable int userid, @PathVariable int bookid, @RequestBody Reservation reservation){
 		String resStatus="Waiting";
 		Optional<User> userOptional = userRepo.findById(userid);
@@ -93,20 +57,28 @@ public class ReservationController {
 		if(!bookOptional.isPresent()) {
 			throw new BookNotFoundException("book id -"+bookid);
 		}
-		User user = userOptional.get();
+		User user = userOptional.get(); 
 		Book book = bookOptional.get();
-		
+	
 		reservation.setUser(user);
 		reservation.setBook(book);
 		
+		int requestedBooks = user.getUserAccount().getRequestedbooks();
+		int reservedBooks = user.getUserAccount().getReservedbooks();
 		int bookCount = book.getCopiesAvailable();
 		
 		if(bookCount >= 1) {
 			resStatus = "Reserved";
+			user.getUserAccount().setRequestedbooks(requestedBooks+1);
+			user.getUserAccount().setReservedbooks(reservedBooks+1);
 			book.setCopiesAvailable(bookCount-1);
+			
 		}
 		reservation.setStatus(resStatus);
+		
+			
 		resvRepo.save(reservation);
+		bookRepo.save(book);
 		
 		URI uri = ServletUriComponentsBuilder
 			.fromCurrentRequest()
@@ -117,8 +89,8 @@ public class ReservationController {
 		return ResponseEntity.created(uri).build();
 	}
 	
-	@PostMapping("/lb/uses/{userid}/book/{bookid}/reservation/{resevid}/status/{status}")
-	public ResponseEntity<Reservation> updateResStatus(@PathVariable int userid, @PathVariable int bookid, @PathVariable int resvId, @PathVariable String status){
+	@PutMapping("/lb/user/{userid}/book/{bookid}/reservation/{resevid}/status/{status}")
+	public ResponseEntity<Reservation> updateResStatus(@PathVariable int userid, @PathVariable int bookid, @PathVariable int resevid, @PathVariable String status){
 		
 		Optional<User> userOptional = userRepo.findById(userid);
 		if(!userOptional.isPresent()) {
@@ -129,24 +101,40 @@ public class ReservationController {
 			throw new BookNotFoundException("book id -"+bookid);
 		}
 
-		Optional<Reservation> resvOptional = resvRepo.findById(resvId);
+		Optional<Reservation> resvOptional = resvRepo.findById(resevid);
 		if(!resvOptional.isPresent()) {
-			throw new ResvNotFound("resv id "+resvId);
+			throw new ResvNotFound("resv id "+resevid);
 		}
+		
+		User user = userOptional.get();
 		Book book  = bookOptional.get();
 		
-				
+		int returnedBooks = user.getUserAccount().getReturnedbooks();
+		int lostBooks = user.getUserAccount().getLostbooks();
+		int fineAmount = user.getUserAccount().getFineAmount();
+		
 		Reservation savedResv = resvOptional.get();
 		savedResv.setStatus(status);
 		
 		switch(status) {
 			case "Return": book.setCopiesAvailable(book.getCopiesAvailable()+1);
+						   savedResv.setLeaseTime(0);
+						   user.getUserAccount().setReturnedbooks(returnedBooks+1);
+						   bookRepo.save(book);
+						   break;
 			case "Extended": savedResv.setLeaseTime(savedResv.getLeaseTime()+15);
+							break;
+			case "Lost": savedResv.setLeaseTime(0); 
+						 book.setCopiesAvailable(book.getCopiesAvailable()-1);
+						 user.getUserAccount().setLostbooks(lostBooks+1);
+						 user.getUserAccount().setFineAmount(fineAmount+FINE_AMOUNT);
+						 bookRepo.save(book);
+						 break;
+			default: throw new ResvNotFound("Reservation id"+resevid);
 		}
 		
-		//Update the current reservation
-		resvRepo.save(savedResv);
 		
+		resvRepo.save(savedResv); 
 		URI uri = ServletUriComponentsBuilder
 			.fromCurrentRequest()
 			.path("/{id}")

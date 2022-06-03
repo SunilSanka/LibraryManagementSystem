@@ -17,45 +17,96 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.in28min.librarymanagement.jpa.entity.Book;
+import com.in28min.librarymanagement.jpa.entity.Feedback;
+import com.in28min.librarymanagement.jpa.entity.Reservation;
+import com.in28min.librarymanagement.jpa.entity.User;
 import com.in28min.librarymanagement.jpa.exception.BookNotFoundException;
+import com.in28min.librarymanagement.jpa.exception.UserNotFoundException;
 import com.in28min.librarymanagement.jpa.repository.BookRepository;
+import com.in28min.librarymanagement.jpa.repository.FeedbackRepository;
 
 
 @RestController
 public class BookController {
 	
 	@Autowired
-	BookRepository bookRepository;
+	BookRepository bookRepo;
 	
-	@GetMapping("/lb/books")
+	@Autowired
+	FeedbackRepository feedbackRepo;
+	
+	@GetMapping("/lb/book")
 	public List<Book> retrieveAllBooks(){
-		return bookRepository.findAll();
+		return bookRepo.findAll();
 	}
 	
-	@GetMapping("/lb/books/{id}")
+	@GetMapping("/lb/book/{id}")
 	public Book retriveBook(@PathVariable int id) {
-		Optional<Book> book = bookRepository.findById(id);
+		Optional<Book> book = bookRepo.findById(id);
 		if(book.isEmpty()) {
 			throw new BookNotFoundException("id - "+id);
 		}
 		return book.get();
 	}
 	
-	@PostMapping("/lb/books/")
+	@GetMapping("/lb/book/{id}/feedback")
+	public List<Feedback> retrieveBookFeedbacks(@PathVariable int id){
+		Optional<Book> bookOptional = bookRepo.findById(id);
+		if(!bookOptional.isPresent()) {
+			throw new UserNotFoundException("book id - "+id);
+		}
+		return bookOptional.get().getFeedbacks();
+	}
+	
+	@GetMapping("/lb/book/{id}/reservation")
+	public List<Reservation> retrieveBookReservations(@PathVariable int id){
+		Optional<Book> bookOptional =  bookRepo.findById(id);
+		if(!bookOptional.isPresent()) {
+			throw new UserNotFoundException("book id - "+id);
+		}
+		return bookOptional.get().getReservation();
+	}
+	
+	
+	@PostMapping("/lb/book")
 	public ResponseEntity<Book> addBook(@Valid @RequestBody Book book){
-		Book savedBook = bookRepository.save(book);
+		Book savedBook = bookRepo.save(book);
 		URI	location = ServletUriComponentsBuilder
 				.fromCurrentRequest()
 				.path("/{id}")
 				.buildAndExpand(savedBook.getId())
 				.toUri();
 		return ResponseEntity.created(location).build();
-				
 	}
 	
-	@DeleteMapping("/lb/books/")
+	
+	
+	@DeleteMapping("/lb/book")
 	public void deleteBook(@PathVariable int id) {
-		bookRepository.deleteById(id);
+		Optional<Book> bookOption = bookRepo.findById(id);
+		if(!bookOption.isPresent()) {
+			throw new BookNotFoundException("book id :"+id);
+		}
+		Book book = bookOption.get();
+		
+		//Delete all attached feedbacks
+		List<Feedback> bookFeedback = book.getFeedbacks();
+		if(!bookFeedback.isEmpty()) {
+			bookFeedback.stream().forEach(feedback -> {
+				feedbackRepo.deleteById(feedback.getId());
+			});
+		}
+		
+		//Delete All Reservations
+		List<Reservation> bookReservations = book.getReservation();
+		if(!bookReservations.isEmpty()) {
+			bookReservations.stream().forEach(reservation -> {
+				bookRepo.deleteById(reservation.getId());
+			});
+		}
+		
+		//Delete Book
+		bookRepo.deleteById(id);
 	}
 
 }

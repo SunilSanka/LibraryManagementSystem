@@ -44,6 +44,13 @@ public class CustomizedResponseEntityException extends ResponseEntityExceptionHa
 			= new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
 		return new ResponseEntity(exceptionResponse, HttpStatus.NOT_FOUND);
 	}
+	
+	@ExceptionHandler(UserAccountAlreadyExist.class)
+	public final ResponseEntity<Object> handleUserAccountException(Exception ex, WebRequest request){
+		ExceptionResponse exceptionResonse
+			= new ExceptionResponse(new Date(), ex.getMessage(), request.getDescription(false));
+		return new ResponseEntity(exceptionResonse, HttpStatus.CONFLICT);
+	}
  	
 	@Override
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(

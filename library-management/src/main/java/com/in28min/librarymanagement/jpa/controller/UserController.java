@@ -23,12 +23,14 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.in28min.librarymanagement.jpa.entity.Book;
 import com.in28min.librarymanagement.jpa.entity.Feedback;
+import com.in28min.librarymanagement.jpa.entity.Reservation;
 import com.in28min.librarymanagement.jpa.entity.User;
 import com.in28min.librarymanagement.jpa.entity.UserAccount;
 import com.in28min.librarymanagement.jpa.exception.BookNotFoundException;
 import com.in28min.librarymanagement.jpa.exception.UserNotFoundException;
 import com.in28min.librarymanagement.jpa.repository.BookRepository;
 import com.in28min.librarymanagement.jpa.repository.FeedbackRepository;
+import com.in28min.librarymanagement.jpa.repository.ReservationRepo;
 import com.in28min.librarymanagement.jpa.repository.UserAccountRepository;
 import com.in28min.librarymanagement.jpa.repository.UserRepository;
 
@@ -48,13 +50,16 @@ public class UserController {
 	
 	@Autowired
 	UserAccountRepository userAccountRepo;
+	
+	@Autowired
+	ReservationRepo resvRepo;
 
-	@GetMapping("/lb/users")
+	@GetMapping("/lb/user")
 	public List<User> retrieveAllUsers(){
 		return userRepository.findAll();
 	}
-	
-	@GetMapping("/lb/users/{id}")
+
+	@GetMapping("/lb/user/{id}")
 	public EntityModel<User> retrieveOne(@PathVariable int id){
 		Optional<User> userOptional = userRepository.findById(id);
 		if(userOptional.isEmpty()) {
@@ -64,15 +69,25 @@ public class UserController {
 		EntityModel<User> model = EntityModel.of(user);
 		WebMvcLinkBuilder linkToUsers = 
 				linkTo(methodOn(this.getClass()).retrieveAllUsers());
+		WebMvcLinkBuilder linkToFeedback = 
+				linkTo(methodOn(this.getClass()).retrieveUserFeedbacks(id));
+		WebMvcLinkBuilder linkToUserAccount = 
+				linkTo(methodOn(this.getClass()).retrieveUserAccount(id));
+		WebMvcLinkBuilder linkToUserReservation = 
+				linkTo(methodOn(this.getClass()).retrieveUserReservation(id));
 
 		model.add(linkToUsers.withRel("all-users"));
+		model.add(linkToFeedback.withRel("user-feedbacks"));
+		model.add(linkToUserAccount.withRel("user-account"));
+		model.add(linkToUserReservation.withRel("user-reservations"));
 		
 		return model;
 	}
 	
+
 	
-	@GetMapping("/lb/users/{id}/feedback")
-	public List<Feedback> retrieveAllUserFeedbacks(@PathVariable int id){
+	@GetMapping("/lb/user/{id}/feedback")
+	public List<Feedback> retrieveUserFeedbacks(@PathVariable int id){
 		Optional<User> useroptional = userRepository.findById(id);
 		if(!useroptional.isPresent()) {
 			throw new UserNotFoundException("user id - "+id);
@@ -80,7 +95,7 @@ public class UserController {
 		return useroptional.get().getFeedbacks();
 	}
 	
-	@GetMapping("/lb/users/{id}/useraccount")
+	@GetMapping("/lb/user/{id}/useraccount")
 	public UserAccount retrieveUserAccount(@PathVariable int id) {
 		
 		Optional<User> userOptional = userRepository.findById(id);
@@ -91,7 +106,17 @@ public class UserController {
 		return userOptional.get().getUserAccount();
 	}
 	
-	@PostMapping("/lb/users/")
+	@GetMapping("/lb/user/{id}/reservation")
+	public List<Reservation> retrieveUserReservation(@PathVariable int id) {
+		Optional<User> userOptional = userRepository.findById(id);
+		if(!userOptional.isPresent()) {
+			throw new UserNotFoundException("user id - "+id);
+		}
+		
+		return userOptional.get().getReservations();
+	}
+	
+	@PostMapping("/lb/user")
 	 public ResponseEntity<User> createUser(@Valid @RequestBody User user){
 		User savedUser  = userRepository.save(user);
 		
@@ -144,8 +169,32 @@ public class UserController {
     	
 	}
 	
-	@DeleteMapping("/lb/users/")
+	@DeleteMapping("/lb/user/{id}")
 	public void  deleteUser(@PathVariable int id) {
+		Optional<User> userOptional = userRepository.findById(id);
+		if(!userOptional.isPresent()) {
+			throw new UserNotFoundException("user id - "+id);
+		}
+		User user = userOptional.get();
+		
+		//Delete all user Feedbacks
+		List<Feedback> userFeedback = user.getFeedbacks();
+		if(!userFeedback.isEmpty()) {
+				userFeedback.stream().forEach(feedback -> {
+					feedbackRepo.deleteById(feedback.getId());
+			});
+		}
+		//Delete User Account
+		UserAccount userAccount = user.getUserAccount();
+		userAccountRepo.deleteById(userAccount.getId());
+				
+		
+		//Delete User Reservations
+		List<Reservation> reservations = user.getReservations();
+		reservations.stream().forEach(reservation -> {
+			resvRepo.deleteById(reservation.getId());
+		});
+		
 		userRepository.deleteById(id);
 	
 	}

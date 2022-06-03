@@ -13,13 +13,12 @@ public class UserAccount {
 	
 	@GeneratedValue
 	@Id
-	@JsonIgnore
 	private int id;
 	
 	@OneToOne(fetch = FetchType.LAZY)
 	@JsonIgnore
 	private User user;
-	private int borrowedbooks;
+	private int requestedbooks;
 	private int reservedbooks;
 	private int returnedbooks;
 	private int lostbooks;
@@ -39,11 +38,11 @@ public class UserAccount {
 	public void setUser(User user) {
 		this.user = user;
 	}
-	public int getBorrowedbooks() {
-		return borrowedbooks;
+	public int getRequestedbooks() {
+		return requestedbooks;
 	}
-	public void setBorrowedbooks(int borrowedbooks) {
-		this.borrowedbooks = borrowedbooks;
+	public void setRequestedbooks(int requestedbooks) {
+		this.requestedbooks = requestedbooks;
 	}
 	public int getReservedbooks() {
 		return reservedbooks;
@@ -73,7 +72,7 @@ public class UserAccount {
 	
 	@Override
 	public String toString() {
-		return "UserAccount [id=" + id + ", borrowedbooks=" + borrowedbooks + ", reservedbooks="
+		return "UserAccount [id=" + id + ", borrowedbooks=" + requestedbooks + ", reservedbooks="
 				+ reservedbooks + ", returnedbooks=" + returnedbooks + ", lostbooks=" + lostbooks + ", fineAmount="
 				+ fineAmount + "]";
 	}
