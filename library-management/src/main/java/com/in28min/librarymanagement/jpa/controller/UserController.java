@@ -54,12 +54,12 @@ public class UserController {
 	@Autowired
 	ReservationRepo resvRepo;
 
-	@GetMapping("/lb/user")
+	@GetMapping("/lb/users")
 	public List<User> retrieveAllUsers(){
 		return userRepository.findAll();
 	}
 
-	@GetMapping("/lb/user/{id}")
+	@GetMapping("/lb/users/{id}")
 	public EntityModel<User> retrieveOne(@PathVariable int id){
 		Optional<User> userOptional = userRepository.findById(id);
 		if(userOptional.isEmpty()) {
@@ -86,7 +86,7 @@ public class UserController {
 	
 
 	
-	@GetMapping("/lb/user/{id}/feedback")
+	@GetMapping("/lb/users/{id}/feedbacks")
 	public List<Feedback> retrieveUserFeedbacks(@PathVariable int id){
 		Optional<User> useroptional = userRepository.findById(id);
 		if(!useroptional.isPresent()) {
@@ -95,7 +95,7 @@ public class UserController {
 		return useroptional.get().getFeedbacks();
 	}
 	
-	@GetMapping("/lb/user/{id}/useraccount")
+	@GetMapping("/lb/users/{id}/useraccount")
 	public UserAccount retrieveUserAccount(@PathVariable int id) {
 		
 		Optional<User> userOptional = userRepository.findById(id);
@@ -106,7 +106,7 @@ public class UserController {
 		return userOptional.get().getUserAccount();
 	}
 	
-	@GetMapping("/lb/user/{id}/reservation")
+	@GetMapping("/lb/users/{id}/reservations")
 	public List<Reservation> retrieveUserReservation(@PathVariable int id) {
 		Optional<User> userOptional = userRepository.findById(id);
 		if(!userOptional.isPresent()) {
@@ -116,7 +116,7 @@ public class UserController {
 		return userOptional.get().getReservations();
 	}
 	
-	@PostMapping("/lb/user")
+	@PostMapping("/lb/users")
 	 public ResponseEntity<User> createUser(@Valid @RequestBody User user){
 		User savedUser  = userRepository.save(user);
 		
@@ -136,7 +136,7 @@ public class UserController {
 	
 
 	
-	@PostMapping("/lb/uses/{userid}/book/{bookid}/feedback")
+	@PostMapping("/lb/users/{userid}/books/{bookid}/feedback")
 	public ResponseEntity<Feedback> createFeedback(@PathVariable int userid, @PathVariable int bookid, @RequestBody Feedback feedback){
     	Optional<User> userOptional = userRepository.findById(userid);
     		if(!userOptional.isPresent()) {
@@ -169,7 +169,7 @@ public class UserController {
     	
 	}
 	
-	@DeleteMapping("/lb/user/{id}")
+	@DeleteMapping("/lb/users/{id}")
 	public void  deleteUser(@PathVariable int id) {
 		Optional<User> userOptional = userRepository.findById(id);
 		if(!userOptional.isPresent()) {

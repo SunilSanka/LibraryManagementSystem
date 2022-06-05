@@ -35,12 +35,12 @@ public class BookController {
 	@Autowired
 	FeedbackRepository feedbackRepo;
 	
-	@GetMapping("/lb/book")
+	@GetMapping("/lb/books")
 	public List<Book> retrieveAllBooks(){
 		return bookRepo.findAll();
 	}
 	
-	@GetMapping("/lb/book/{id}")
+	@GetMapping("/lb/books/{id}")
 	public Book retriveBook(@PathVariable int id) {
 		Optional<Book> book = bookRepo.findById(id);
 		if(book.isEmpty()) {
@@ -49,7 +49,7 @@ public class BookController {
 		return book.get();
 	}
 	
-	@GetMapping("/lb/book/{id}/feedback")
+	@GetMapping("/lb/books/{id}/feedbacks")
 	public List<Feedback> retrieveBookFeedbacks(@PathVariable int id){
 		Optional<Book> bookOptional = bookRepo.findById(id);
 		if(!bookOptional.isPresent()) {
@@ -58,7 +58,7 @@ public class BookController {
 		return bookOptional.get().getFeedbacks();
 	}
 	
-	@GetMapping("/lb/book/{id}/reservation")
+	@GetMapping("/lb/books/{id}/reservations")
 	public List<Reservation> retrieveBookReservations(@PathVariable int id){
 		Optional<Book> bookOptional =  bookRepo.findById(id);
 		if(!bookOptional.isPresent()) {
@@ -68,7 +68,7 @@ public class BookController {
 	}
 	
 	
-	@PostMapping("/lb/book")
+	@PostMapping("/lb/books")
 	public ResponseEntity<Book> addBook(@Valid @RequestBody Book book){
 		Book savedBook = bookRepo.save(book);
 		URI	location = ServletUriComponentsBuilder
@@ -81,7 +81,7 @@ public class BookController {
 	
 	
 	
-	@DeleteMapping("/lb/book")
+	@DeleteMapping("/lb/books")
 	public void deleteBook(@PathVariable int id) {
 		Optional<Book> bookOption = bookRepo.findById(id);
 		if(!bookOption.isPresent()) {

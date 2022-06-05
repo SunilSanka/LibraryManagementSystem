@@ -39,14 +39,14 @@ public class ReservationController {
 	@Autowired
 	private BookRepository bookRepo;
 	
-	@GetMapping("/lb/reservation")
+	@GetMapping("/lb/reservations")
 	public List<Reservation>  getAllReservation() {
 		return resvRepo.findAll();
 	}
 	
 	private final int FINE_AMOUNT = 500;
 	
-	@PostMapping("/lb/reservation/user/{userid}/book/{bookid}")
+	@PostMapping("/lb/reservations/users/{userid}/books/{bookid}")
 	public ResponseEntity<Reservation> createReservation(@PathVariable int userid, @PathVariable int bookid, @RequestBody Reservation reservation){
 		String resStatus="Waiting";
 		Optional<User> userOptional = userRepo.findById(userid);
@@ -89,7 +89,7 @@ public class ReservationController {
 		return ResponseEntity.created(uri).build();
 	}
 	
-	@PutMapping("/lb/user/{userid}/book/{bookid}/reservation/{resevid}/status/{status}")
+	@PutMapping("/lb/users/{userid}/books/{bookid}/reservations/{resevid}/status/{status}")
 	public ResponseEntity<Reservation> updateResStatus(@PathVariable int userid, @PathVariable int bookid, @PathVariable int resevid, @PathVariable String status){
 		
 		Optional<User> userOptional = userRepo.findById(userid);

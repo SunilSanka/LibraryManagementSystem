@@ -1,25 +1,7 @@
 package com.in28min.librarymanagement.jpa.controller;
 
-import java.net.URI;
-import java.util.List;
-import java.util.Optional;
-
-import javax.websocket.server.PathParam;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import org.springframework.web.util.UriComponents;
-
-import com.in28min.librarymanagement.jpa.entity.User;
-import com.in28min.librarymanagement.jpa.entity.UserAccount;
-import com.in28min.librarymanagement.jpa.exception.UserAccountAlreadyExist;
-import com.in28min.librarymanagement.jpa.exception.UserNotFoundException;
 import com.in28min.librarymanagement.jpa.repository.BookRepository;
 import com.in28min.librarymanagement.jpa.repository.UserAccountRepository;
 import com.in28min.librarymanagement.jpa.repository.UserRepository;
