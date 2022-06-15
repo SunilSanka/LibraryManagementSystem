@@ -3,10 +3,8 @@ package com.librarymanagement.libraryreservations;
 
 import java.net.URI;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,8 +15,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
 import com.librarymanagement.libraryreservations.exceptions.LibraryResvNotFound;
+import com.librarymanagement.libraryreservations.feign.LibraryBookProxy;
+import com.librarymanagement.libraryreservations.feign.LibraryUserAccountProxy;
+import com.librarymanagement.libraryreservations.feign.LibraryUserProxy;
 
 @RestController
 public class LibraryReservationController {
@@ -27,7 +27,16 @@ public class LibraryReservationController {
 	private LibraryReservationRepository resvRepo;
 	
 	@Autowired
-	private RestTemplateClient restTemplateClient;
+	private LibraryUserProxy lbUserProxy;
+	
+	@Autowired
+	private LibraryBookProxy lbBookProxy;
+	
+	@Autowired
+	private LibraryUserAccountProxy lbUserAccountProxy;
+	
+	//@Autowired
+	//private RestTemplateClient restTemplateClient;
 	
 	private LibraryBook libraryBook; 
 	private LibraryUserAccount libraryUserAccount;
@@ -48,17 +57,26 @@ public class LibraryReservationController {
 	public ResponseEntity<LibraryReservations> createReservation(@RequestBody LibraryReservations reservation){
 		String resStatus="Waiting";
 		
+		/*
 		HashMap<String, Integer> uriVariables = new HashMap<String, Integer>();
 		uriVariables.put("userid", reservation.getUserId());
-		uriVariables.put("bookid", reservation.getBookid());
+		uriVariables.put("bookid", reservation.getBookid()); 
 		
 		ResponseEntity<LibraryUser> userOptional = restTemplateClient.restTemplate().getForEntity("http://localhost:8100/lbm/users/{userid}", LibraryUser.class, uriVariables);
 		if(userOptional.getBody() == null) {
 			return null;
+		} */
+		
+		LibraryUser lbUser = lbUserProxy.retrieveLibraryuser(reservation.getUserId());
+		if(lbUser == null) {
+			return null;
 		}
 		
-		libraryBook = restTemplateClient.restTemplate().getForEntity("http://localhost:8200/lbm/librarybooks/{bookid}/", LibraryBook.class, uriVariables).getBody(); 
-		libraryUserAccount = restTemplateClient.restTemplate().getForEntity("http://localhost:8300/lbm/libraryuseraccounts/{userid}/", LibraryUserAccount.class, uriVariables).getBody(); 
+		//libraryBook = restTemplateClient.restTemplate().getForEntity("http://localhost:8200/lbm/librarybooks/{bookid}/", LibraryBook.class, uriVariables).getBody(); 
+		libraryBook =  lbBookProxy.retriveBook(reservation.getBookid());
+		
+		//libraryUserAccount = restTemplateClient.restTemplate().getForEntity("http://localhost:8300/lbm/libraryuseraccounts/{userid}/", LibraryUserAccount.class, uriVariables).getBody();
+		libraryUserAccount = lbUserAccountProxy.getLibraryUserAccount(reservation.getUserId());
 
 		//Book Availability
 		if(libraryBook.getCopiesAvailable() >= 1) { 
@@ -73,8 +91,11 @@ public class LibraryReservationController {
 			//Library Book - Available Copies
 			libraryBook.setCopiesAvailable(libraryBook.getCopiesAvailable()-1);
 			
-			restTemplateClient.restTemplate().put("http://localhost:8200/lbm/librarybooks/",libraryBook);
-			restTemplateClient.restTemplate().put("http://localhost:8300/lbm/libraryuseraccounts/",libraryUserAccount);
+			//restTemplateClient.restTemplate().put("http://localhost:8200/lbm/librarybooks/",libraryBook);
+			lbBookProxy.updateBook(libraryBook);
+			
+			//restTemplateClient.restTemplate().put("http://localhost:8300/lbm/libraryuseraccounts/",libraryUserAccount);
+			lbUserAccountProxy.updateuserAccount(libraryUserAccount);
 		}
 		
 		reservation.setEntryDate(new Date());
@@ -94,7 +115,7 @@ public class LibraryReservationController {
 	@PutMapping("/lbm/libraryreservations/{id}/status/{status}")
 	public ResponseEntity<LibraryReservations> updateResStatus(@PathVariable int id, @PathVariable String status){
 		
-		HashMap<String, Integer> uriVariables = new HashMap<String, Integer>();
+		//HashMap<String, Integer> uriVariables = new HashMap<String, Integer>();
 		Optional<LibraryReservations> libraryResvOptional = resvRepo.findById(id);
 		
 		if(!libraryResvOptional.isPresent()) {
@@ -106,20 +127,27 @@ public class LibraryReservationController {
 		if(savedLibResv.getStatus().equalsIgnoreCase("Return") || savedLibResv.getStatus().equalsIgnoreCase("Lost")) {
 			throw new LibraryResvNotFound("Reservation Id :"+id);
 		}
-		
+		/*
 		uriVariables.put("userid", savedLibResv.getUserId());
 		uriVariables.put("bookid", savedLibResv.getBookid());
 	
 		libraryBook = restTemplateClient.restTemplate().getForEntity("http://localhost:8200/lbm/librarybooks/{bookid}/", LibraryBook.class, uriVariables).getBody();
+		*/
+		libraryBook =  lbBookProxy.retriveBook(savedLibResv.getBookid());
 		
-		libraryUserAccount = restTemplateClient.restTemplate().getForEntity("http://localhost:8300/lbm/libraryuseraccounts/{userid}/", LibraryUserAccount.class, uriVariables).getBody(); 
+		//libraryUserAccount = restTemplateClient.restTemplate().getForEntity("http://localhost:8300/lbm/libraryuseraccounts/{userid}/", LibraryUserAccount.class, uriVariables).getBody();
+		libraryUserAccount = lbUserAccountProxy.getLibraryUserAccount(savedLibResv.getBookid());
 		
 	 switch(status) {
 		
 			case "Return": libraryBook.setCopiesAvailable(libraryBook.getCopiesAvailable()+1); 
 						   libraryUserAccount.setReturnedbooks(libraryUserAccount.getReturnedbooks()+1);
-						   restTemplateClient.restTemplate().put("http://localhost:8200/lbm/librarybooks/",libraryBook);
-						   restTemplateClient.restTemplate().put("http://localhost:8300/lbm/libraryuseraccounts/",libraryUserAccount);
+						   //restTemplateClient.restTemplate().put("http://localhost:8200/lbm/librarybooks/",libraryBook);
+						   lbBookProxy.updateBook(libraryBook);
+						   
+						   //restTemplateClient.restTemplate().put("http://localhost:8300/lbm/libraryuseraccounts/",libraryUserAccount);
+						   lbUserAccountProxy.updateuserAccount(libraryUserAccount);
+						   
 						   savedLibResv.setLeaseTime(0);
 						   break;
 						   
@@ -130,8 +158,11 @@ public class LibraryReservationController {
 						 libraryBook.setCopiesAvailable(libraryBook.getCopiesAvailable()-1);
 						 libraryUserAccount.setLostbooks(libraryUserAccount.getLostbooks()+1);
 						 libraryUserAccount.setFineAmount(libraryUserAccount.getFineAmount()+FINE);
-						 restTemplateClient.restTemplate().put("http://localhost:8200/lbm/librarybooks/",libraryBook);
-						 restTemplateClient.restTemplate().put("http://localhost:8300/lbm/libraryuseraccounts/",libraryUserAccount);
+						 //restTemplateClient.restTemplate().put("http://localhost:8200/lbm/librarybooks/",libraryBook);
+						 lbBookProxy.updateBook(libraryBook);
+						 
+						 //restTemplateClient.restTemplate().put("http://localhost:8300/lbm/libraryuseraccounts/",libraryUserAccount);
+						 lbUserAccountProxy.updateuserAccount(libraryUserAccount);
 						 break;
 						 
 			default: throw new LibraryResvNotFound("Reservation id"+id);
