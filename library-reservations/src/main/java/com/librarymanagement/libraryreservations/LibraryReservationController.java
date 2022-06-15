@@ -136,7 +136,7 @@ public class LibraryReservationController {
 		libraryBook =  lbBookProxy.retriveBook(savedLibResv.getBookid());
 		
 		//libraryUserAccount = restTemplateClient.restTemplate().getForEntity("http://localhost:8300/lbm/libraryuseraccounts/{userid}/", LibraryUserAccount.class, uriVariables).getBody();
-		libraryUserAccount = lbUserAccountProxy.getLibraryUserAccount(savedLibResv.getBookid());
+		libraryUserAccount = lbUserAccountProxy.getLibraryUserAccount(savedLibResv.getUserId());
 		
 	 switch(status) {
 		
@@ -155,7 +155,6 @@ public class LibraryReservationController {
 							 break;
 							 
 			case "Lost": savedLibResv.setLeaseTime(0);
-						 libraryBook.setCopiesAvailable(libraryBook.getCopiesAvailable()-1);
 						 libraryUserAccount.setLostbooks(libraryUserAccount.getLostbooks()+1);
 						 libraryUserAccount.setFineAmount(libraryUserAccount.getFineAmount()+FINE);
 						 //restTemplateClient.restTemplate().put("http://localhost:8200/lbm/librarybooks/",libraryBook);
