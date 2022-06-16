@@ -12,7 +12,7 @@
 	<artifactId>library-users</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>library-users</name>
-	<description> Spring Boot for Library Books</description>
+	<description>Spring Boot for Library Users</description>
 	<properties>
 		<java.version>11</java.version>
 		<spring-cloud.version>2021.0.3</spring-cloud.version>
@@ -38,7 +38,10 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-config</artifactId>
 		</dependency>
-
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
