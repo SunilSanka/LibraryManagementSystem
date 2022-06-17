@@ -79,6 +79,50 @@ public class BookController {
 		return ResponseEntity.created(location).build();
 	}
 	
+	@PostMapping("/lb/books/{bookid}/available/{count}")
+	public ResponseEntity<Book> increaseCount(@PathVariable int bookid, @PathVariable int count){
+		Optional<Book> bookOptional =  bookRepo.findById(bookid);
+		if(!bookOptional.isPresent()) {
+			throw new UserNotFoundException("book id - "+bookid);
+		}
+		Book savedBook = bookOptional.get();
+		savedBook.setCopiesAvailable(count);
+		bookRepo.save(savedBook);
+		
+		URI	location = ServletUriComponentsBuilder
+				.fromCurrentRequest()
+				.path("/{id}")
+				.buildAndExpand(savedBook.getId())
+				.toUri();
+		return ResponseEntity.created(location).build();
+	}
+	
+	@PostMapping("/lb/books/{bookid}/available/{count}")
+	public ResponseEntity<Book> decreaseCount(@PathVariable int bookid, @PathVariable int count){
+		Optional<Book> bookOptional =  bookRepo.findById(bookid);
+		if(!bookOptional.isPresent()) {
+			throw new UserNotFoundException("book id - "+bookid);
+		}
+		Book savedBook = bookOptional.get();
+		savedBook.setCopiesAvailable(count);
+		bookRepo.save(savedBook);
+		
+		URI	location = ServletUriComponentsBuilder
+				.fromCurrentRequest()
+				.path("/{id}")
+				.buildAndExpand(savedBook.getId())
+				.toUri();
+		return ResponseEntity.created(location).build();
+	}
+	
+	@GetMapping("/lb/books/{bookid}/available")
+	public int getCount(@PathVariable int bookid, @PathVariable int count){
+		Optional<Book> bookOptional =  bookRepo.findById(bookid);
+		if(!bookOptional.isPresent()) {
+			throw new UserNotFoundException("book id - "+bookid);
+		}
+		return bookOptional.get().getCopiesAvailable();
+	}
 	
 	
 	@DeleteMapping("/lb/books")

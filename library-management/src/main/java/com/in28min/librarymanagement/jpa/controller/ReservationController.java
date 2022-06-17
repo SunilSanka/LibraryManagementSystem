@@ -1,6 +1,7 @@
 package com.in28min.librarymanagement.jpa.controller;
 
 import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.in28min.librarymanagement.jpa.entity.Book;
@@ -49,15 +51,24 @@ public class ReservationController {
 	@PostMapping("/lb/reservations/users/{userid}/books/{bookid}")
 	public ResponseEntity<Reservation> createReservation(@PathVariable int userid, @PathVariable int bookid, @RequestBody Reservation reservation){
 		String resStatus="Waiting";
+		
+		HashMap<String, Integer> uriVariables = new HashMap<String, Integer>();
+		uriVariables.put("userid", userid);
+		
+		ResponseEntity<User> responseEntity 
+				= new RestTemplate().getForEntity("http://localhost:8080/lb/users/{userid}/",User.class, uriVariables);
+		
+		User user = responseEntity.getBody();
+		/*
 		Optional<User> userOptional = userRepo.findById(userid);
 		if(!userOptional.isPresent()) {
 			throw new UserNotFoundException("user id -"+userid);
-		}
+		} */
 		Optional<Book> bookOptional = bookRepo.findById(bookid);
 		if(!bookOptional.isPresent()) {
 			throw new BookNotFoundException("book id -"+bookid);
 		}
-		User user = userOptional.get(); 
+		//User user = userOptional.get(); 
 		Book book = bookOptional.get();
 	
 		reservation.setUser(user);
