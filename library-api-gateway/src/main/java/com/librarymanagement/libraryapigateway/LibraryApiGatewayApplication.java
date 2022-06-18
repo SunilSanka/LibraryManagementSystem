@@ -1,13 +1,13 @@
-package com.in28min.librarymanagement;
+package com.librarymanagement.libraryapigateway;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class LibraryManagementApplication {
+public class LibraryApiGatewayApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(LibraryManagementApplication.class, args);
+		SpringApplication.run(LibraryApiGatewayApplication.class, args);
 	}
 
 }

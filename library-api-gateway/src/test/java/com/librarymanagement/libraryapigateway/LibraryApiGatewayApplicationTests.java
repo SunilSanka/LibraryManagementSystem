@@ -1,10 +1,10 @@
-package com.in28min.librarymanagement;
+package com.librarymanagement.libraryapigateway;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class LibraryManagementApplicationTests {
+class LibraryApiGatewayApplicationTests {
 
 	@Test
 	void contextLoads() {
