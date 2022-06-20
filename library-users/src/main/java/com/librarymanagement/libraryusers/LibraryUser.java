@@ -1,6 +1,7 @@
 package com.librarymanagement.libraryusers;
 
 import java.util.Date;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -9,14 +10,14 @@ import javax.validation.constraints.Size;
 
 @Entity
 public class LibraryUser {
-	
+
 	@Id
 	@GeneratedValue
 	private Integer id;
-	
+
 	@Size(min=2)
 	private String name;
-	
+
 	@Past
 	private Date birthDate;
 
@@ -48,7 +49,7 @@ public class LibraryUser {
 	public String toString() {
 		return "LibraryUser [id=" + id + ", name=" + name + ", birthDate=" + birthDate + "]";
 	}
-	
-	
+
+
 
 }

@@ -5,6 +5,7 @@ import java.net.URI;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,10 +16,14 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
 import com.librarymanagement.libraryreservations.exceptions.LibraryResvNotFound;
 import com.librarymanagement.libraryreservations.feign.LibraryBookProxy;
 import com.librarymanagement.libraryreservations.feign.LibraryUserAccountProxy;
 import com.librarymanagement.libraryreservations.feign.LibraryUserProxy;
+
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 
 @RestController
 public class LibraryReservationController {
@@ -53,7 +58,14 @@ public class LibraryReservationController {
 		return resvOptional.get();
 	}
 	
+	public ResponseEntity<LibraryReservations>  hardcodedResponse(Exception ex) {
+		//return "fallback-response-post-reservations";
+		return null;
+	}
+	
 	@PostMapping("/lbm/libraryreservations")
+	@RateLimiter(name = "library-reservations")
+	@CircuitBreaker(name="library-reservations", fallbackMethod = "hardcodedResponse") // If there is a failure in this method execution, it would try 5 times, if @retry is enabled
 	public ResponseEntity<LibraryReservations> createReservation(@RequestBody LibraryReservations reservation){
 		String resStatus="Waiting";
 		

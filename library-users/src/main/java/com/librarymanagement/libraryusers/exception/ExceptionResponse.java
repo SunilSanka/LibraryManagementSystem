@@ -3,12 +3,12 @@ package com.librarymanagement.libraryusers.exception;
 import java.util.Date;
 
 public class ExceptionResponse {
-	
+
 	private Date timetamp;
 	private String message;
 	private String details;
-	
-	
+
+
 	public ExceptionResponse(Date timetamp, String message, String details) {
 		super();
 		this.timetamp = timetamp;
@@ -37,6 +37,6 @@ public class ExceptionResponse {
 	public void setDetails(String details) {
 		this.details = details;
 	}
-	
+
 
 }

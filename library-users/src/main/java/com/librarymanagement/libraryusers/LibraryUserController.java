@@ -21,12 +21,12 @@ public class LibraryUserController {
 
 	@Autowired
 	private LibraryUserRepo libraryUserRepo;
-	
-	@GetMapping("lbm/users")
+
+	@GetMapping("/lbm/users")
 	private List<LibraryUser> retrieveAllUsers(){
 		return  libraryUserRepo.findAll();
 	}
-	
+
 	@GetMapping("/lbm/users/{userid}")
 	private LibraryUser retrieveLibraryuser(@PathVariable int userid) {
 		Optional<LibraryUser> userOptional = libraryUserRepo.findById(userid);
@@ -35,7 +35,7 @@ public class LibraryUserController {
 		}
 		return userOptional.get();
 	}
-	
+
 	@PostMapping("/lbm/users")
 	private ResponseEntity<LibraryUser> saveUser(@RequestBody LibraryUser libraryUser){
 		LibraryUser savedUser = libraryUserRepo.save(libraryUser);
@@ -46,10 +46,10 @@ public class LibraryUserController {
 				.toUri();
 		return ResponseEntity.created(uri).build();
 	}
-	
+
 	@DeleteMapping("lbm/users/{userid}")
 	private void deleteUser(@PathVariable int userid) {
 		libraryUserRepo.deleteById(userid);
 	}
-	
+
 }
