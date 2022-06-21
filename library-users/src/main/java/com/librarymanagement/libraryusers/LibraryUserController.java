@@ -4,6 +4,8 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,12 +20,15 @@ import com.librarymanagement.libraryusers.exception.UserNotFoundException;
 
 @RestController
 public class LibraryUserController {
+	
+	private Logger logger = LoggerFactory.getLogger(LibraryUserController.class);
 
 	@Autowired
 	private LibraryUserRepo libraryUserRepo;
 
 	@GetMapping("/lbm/users")
 	private List<LibraryUser> retrieveAllUsers(){
+		logger.info("retrieve all users ");
 		return  libraryUserRepo.findAll();
 	}
 
