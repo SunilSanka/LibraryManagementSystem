@@ -1,0 +1,114 @@
+version: '3.7'
+services:
+  library-users:
+    image: sunilsanka/lbm-library-users:0.0.1-SNAPSHOT
+    mem_limit: 700m
+    ports:
+      - "8100:8100"
+    networks:
+      - lbm-network
+    depends_on:
+      - naming-server
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-server:8761/eureka
+      SPRING.ZIPKIN.BASEURL: http://zipkins-server:9411
+      RABBIT_URI: amqp://guest:guest@rabbitmq:5672
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING.ZIPKIN.SENDER-TYPE: rabbit
+  
+  library-users-account:
+    image: sunilsanka/lbm-library-users-account:0.0.1-SNAPSHOT
+    mem_limit: 700m
+    ports:
+      - "8300:8300"
+    networks:
+      - lbm-network
+    depends_on:
+      - naming-server
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-server:8761/eureka
+      SPRING.ZIPKIN.BASEURL: http://zipkins-server:9411
+      RABBIT_URI: amqp://guest:guest@rabbitmq:5672
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING.ZIPKIN.SENDER-TYPE: rabbit
+
+  library-books:
+    image: sunilsanka/lbm-library-books:0.0.1-SNAPSHOT
+    mem_limit: 700m
+    ports:
+      - "8200:8200"
+    networks:
+      - lbm-network
+    depends_on:
+      - naming-server
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-server:8761/eureka
+      SPRING.ZIPKIN.BASEURL: http://zipkins-server:9411
+      RABBIT_URI: amqp://guest:guest@rabbitmq:5672
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING.ZIPKIN.SENDER-TYPE: rabbit
+
+  library-reservations:
+    image: sunilsanka/lbm-library-reservations:0.0.1-SNAPSHOT
+    mem_limit: 700m
+    ports:
+      - "8400:8400"
+    networks:
+      - lbm-network
+    depends_on:
+      - naming-server
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-server:8761/eureka
+      SPRING.ZIPKIN.BASEURL: http://zipkins-server:9411
+      RABBIT_URI: amqp://guest:guest@rabbitmq:5672
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING.ZIPKIN.SENDER-TYPE: rabbit
+
+  api-gateway:
+    image: sunilsanka/lbm-library-api-gateway:0.0.1-SNAPSHOT
+    mem_limit: 700m
+    ports:
+      - "8765:8765"
+    networks:
+      - lbm-network
+    depends_on:
+      - naming-server
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-server:8761/eureka
+      SPRING.ZIPKIN.BASEURL: http://zipkins-server:9411
+      RABBIT_URI: amqp://guest:guest@rabbitmq:5672
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING.ZIPKIN.SENDER-TYPE: rabbit
+  
+  rabbitmq:
+    image: rabbitmq:3.10.5-management
+    mem_limit: 300m
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - lbm-network
+    
+  zipkins-server:
+    image: openzipkin/zipkin:2.23
+    mem_limit: 300m
+    ports:
+      - "9411:9411"  
+    networks:
+      - lbm-network
+    environment:
+      RABBIT_URI: amqp://guest:guest@rabbitmq:5672
+    depends_on:
+      - rabbitmq
+    restart: always
+
+  naming-server:
+    image: sunilsanka/lbm-naming-server:0.0.1-SNAPSHOT
+    mem_limit: 700m
+    ports:
+      - "8761:8761"
+    networks:
+      - lbm-network
+
+networks:
+  lbm-network:
