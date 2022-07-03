@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,7 +29,8 @@ import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 
 @RestController
 public class LibraryReservationController {
-	
+	private Logger logger = LoggerFactory.getLogger(LibraryReservationController.class);
+
 	@Autowired
 	private LibraryReservationRepository resvRepo;
 	
@@ -49,11 +52,13 @@ public class LibraryReservationController {
 	
 	@GetMapping("/lbm/libraryreservations")
 	public List<LibraryReservations>  getAllReservation() {
+		logger.info("GET: All Library Reservations");
 		return resvRepo.findAll();
 	}
 	
 	@GetMapping("/lbm/libraryreservations/{resvid}")
 	public LibraryReservations  getReservation(@PathVariable int resvid) {
+		logger.info("GET: Library Reservations with reservation id {}", resvid);
 		Optional<LibraryReservations> resvOptional = resvRepo.findById(resvid);
 		return resvOptional.get();
 	}
@@ -67,6 +72,7 @@ public class LibraryReservationController {
 	@RateLimiter(name = "library-reservations")
 	@CircuitBreaker(name="library-reservations", fallbackMethod = "hardcodedResponse") // If there is a failure in this method execution, it would try 5 times, if @retry is enabled
 	public ResponseEntity<LibraryReservations> createReservation(@RequestBody LibraryReservations reservation){
+		logger.info("POST: Library Reservations with reservation  {}", reservation);
 		String resStatus="Waiting";
 		
 		/*
@@ -126,7 +132,7 @@ public class LibraryReservationController {
 	
 	@PutMapping("/lbm/libraryreservations/{id}/status/{status}")
 	public ResponseEntity<LibraryReservations> updateResStatus(@PathVariable int id, @PathVariable String status){
-		
+		logger.info("PUT: Update Library Reservations for reservation  {} with status {} ", id, status);
 		//HashMap<String, Integer> uriVariables = new HashMap<String, Integer>();
 		Optional<LibraryReservations> libraryResvOptional = resvRepo.findById(id);
 		

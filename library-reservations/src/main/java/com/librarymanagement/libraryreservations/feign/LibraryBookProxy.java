@@ -15,7 +15,11 @@ import com.librarymanagement.libraryreservations.LibraryBook;
 // Ribbon was used earlier as a loadbalancer
 
 //@FeignClient(name="library-books", url="localhost:8200") => Remove url
-@FeignClient(name="library-books")
+
+//CHANGE-KUBERNETES
+//@FeignClient(name="library-books")
+@FeignClient(name="library-books", url="${LIBRARY_BOOKS_SERVICE_HOST:http://localhost}:8200")
+//@FeignClient(name="library-books", url="${LIBRARY_BOOKS_URI:http://localhost}:8200")
 public interface LibraryBookProxy {
 	
 	@GetMapping("/lbm/librarybooks/{bookid}")

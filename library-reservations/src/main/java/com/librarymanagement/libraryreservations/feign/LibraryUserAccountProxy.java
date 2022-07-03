@@ -15,7 +15,12 @@ import com.librarymanagement.libraryreservations.LibraryUserAccount;
 //Ribbon was used earlier as a loadbalancer
 
 //@FeignClient(name="library-books", url="localhost:8300") => Remove url 
-@FeignClient(name = "library-users-accounts")
+
+
+//CHANGE-KUBERNETES
+//@FeignClient(name = "library-users-accounts")
+@FeignClient(name="library-users-accounts", url="${LIBRARY_USERS_ACCOUNTS_SERVICE_HOST:http://localhost}:8300")
+//@FeignClient(name="library-users-accounts", url="${LIBRARY_USERS_ACCOUNTS_URI:http://localhost}:8300")
 public interface LibraryUserAccountProxy {
 		
 	@GetMapping("/lbm/libraryuseraccounts/{userid}")

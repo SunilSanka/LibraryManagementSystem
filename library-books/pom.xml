@@ -10,8 +10,8 @@
 	</parent>
 	<groupId>com.librarymanagement</groupId>
 	<artifactId>library-books</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>library-books</name>
+	<version>0.0.11-SNAPSHOT</version> <!-- CHANGE-KUBERNETES -->
+	<name>library-books-kubernetes</name> <!-- CHANGE-KUBERNETES -->
 	<description>Spring Boot for Library Books</description>
 	<properties>
 		<java.version>11</java.version>
@@ -39,16 +39,18 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
+		<!-- CHANGE-KUBERNETES -->
 		<!-- 
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-config</artifactId>
 		</dependency>
-		-->
+	
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
 		</dependency>
+			-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
@@ -59,6 +61,8 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-sleuth</artifactId>
 		</dependency>
+		<!-- CHANGE-KUBERNETES -->
+		<!--
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-sleuth-zipkin</artifactId>
@@ -66,7 +70,7 @@
 		<dependency>
 			<groupId>org.springframework.amqp</groupId>
 			<artifactId>spring-rabbit</artifactId>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>

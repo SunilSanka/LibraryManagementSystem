@@ -10,8 +10,8 @@
 	</parent>
 	<groupId>com.librarymanagement</groupId>
 	<artifactId>library-api-gateway</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>library-api-gateway</name>
+	<version>0.0.11-SNAPSHOT</version> <!-- CHANGE-KUBERNETES -->
+	<name>library-api-gateway-kubernetes</name>  <!-- CHANGE-KUBERNETES -->
 	<description>Spring Boot project for api-gateway</description>
 	<properties>
 		<java.version>11</java.version>
@@ -26,10 +26,13 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-gateway</artifactId>
 		</dependency>
+		<!-- CHANGE-KUBERNETES -->
+		<!--
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
 		</dependency>
+		 -->
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -41,6 +44,8 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-sleuth</artifactId>
 		</dependency>
+		<!-- CHANGE-KUBERNETES -->
+		<!--
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-sleuth-zipkin</artifactId>
@@ -48,7 +53,8 @@
 		<dependency>
 			<groupId>org.springframework.amqp</groupId>
 			<artifactId>spring-rabbit</artifactId>
-		</dependency>
+		</dependency> 
+		-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
